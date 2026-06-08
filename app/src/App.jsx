@@ -20,8 +20,22 @@ const products = [
   },
 ]
 
+const MOCK_DELIVERY_DATE = 'Entrega em até 7 dias úteis'
+
 function onlyDigits(value) {
   return value.replace(/\D/g, '')
+}
+
+function parseBrlPrice(value) {
+  const normalized = value.replace(/[^\d,]/g, '').replace(/\./g, '').replace(',', '.')
+  return Number(normalized)
+}
+
+function formatBrlPrice(value) {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(value)
 }
 
 function isValidCpf(value) {
@@ -103,6 +117,22 @@ function ProductDetails({ product, onBack, onCheckout }) {
 
         <div className="details-copy">
           <p className="product-description">{product.description}</p>
+          <div className="details-info-grid">
+            <div className="details-info-card">
+              <span>Data de entrega</span>
+              <strong>{MOCK_DELIVERY_DATE}</strong>
+            </div>
+
+            <div className="details-info-card">
+              <span>Status do pedido</span>
+              <strong>Em separação</strong>
+            </div>
+
+            <div className="details-info-card">
+              <span>Preço</span>
+              <strong>{product.price}</strong>
+            </div>
+          </div>
           <div className="details-actions">
             <button type="button" className="product-button" onClick={() => onCheckout(product)}>
               Ir para o checkout
@@ -111,6 +141,37 @@ function ProductDetails({ product, onBack, onCheckout }) {
         </div>
       </section>
     </main>
+  )
+}
+
+function CheckoutOrderCard({ product, finalPrice }) {
+  return (
+    <section className="checkout-order-card" aria-label="Resumo do pedido">
+      <div className="checkout-order-image-wrap">
+        <img className="checkout-order-image" src={product.image} alt={product.name} />
+      </div>
+
+      <div className="checkout-order-copy">
+        <p className="checkout-order-label">Resumo do pedido</p>
+        <h2>{product.name}</h2>
+        <p className="checkout-order-meta">Entrega em até {MOCK_DELIVERY_DATE}</p>
+
+        <div className="checkout-order-prices">
+          <p className="checkout-price-line">
+            <span>Preço original</span>
+            <strong>{product.price}</strong>
+          </p>
+          <p className="checkout-price-line checkout-price-discount">
+            <span>Cupom aplicado</span>
+            <strong>-10%</strong>
+          </p>
+          <p className="checkout-price-line checkout-price-final">
+            <span>Total com desconto</span>
+            <strong>{formatBrlPrice(finalPrice)}</strong>
+          </p>
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -124,6 +185,10 @@ function CheckoutPage({ product, onBack, onSuccess }) {
   const [errors, setErrors] = useState({})
 
   if (!product) return null
+
+  const originalPrice = parseBrlPrice(product.price)
+  const discountValue = originalPrice * 0.1
+  const finalPrice = originalPrice - discountValue
 
   const updateField = (field, value) => {
     setFormData((current) => ({ ...current, [field]: value }))
@@ -182,9 +247,7 @@ function CheckoutPage({ product, onBack, onSuccess }) {
       </header>
 
       <section className="checkout-summary">
-        <div className="checkout-summary-image-wrap">
-          <img className="checkout-summary-image" src={product.image} alt={product.name} />
-        </div>
+        <CheckoutOrderCard product={product} finalPrice={finalPrice} />
 
         <div>
           <h2>Dados do pagamento</h2>
