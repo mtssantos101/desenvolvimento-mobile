@@ -129,6 +129,17 @@ function CheckoutPage({ product, onBack, onSuccess }) {
     setFormData((current) => ({ ...current, [field]: value }))
   }
 
+  const updateCardNumber = (value) => {
+    updateField('cardNumber', onlyDigits(value).slice(0, 19))
+  }
+  const updateCpf = (value) => {
+    updateField('cpf', onlyDigits(value).slice(0, 11))
+  }
+
+  const updateCcv = (value) => {
+    updateField('ccv', onlyDigits(value).slice(0, 4))
+  }
+
   const handleSubmit = (event) => {
     event.preventDefault()
 
@@ -195,7 +206,9 @@ function CheckoutPage({ product, onBack, onSuccess }) {
                 type="text"
                 inputMode="numeric"
                 value={formData.cpf}
-                onChange={(event) => updateField('cpf', event.target.value)}
+                pattern="[0-9]*"
+                maxLength={11}
+                onChange={(event) => updateCpf(event.target.value)}
                 placeholder="000.000.000-00"
               />
               {errors.cpf && <small className="field-error">{errors.cpf}</small>}
@@ -206,8 +219,10 @@ function CheckoutPage({ product, onBack, onSuccess }) {
               <input
                 type="text"
                 inputMode="numeric"
+                pattern="[0-9]*"
+                maxLength={16}
                 value={formData.cardNumber}
-                onChange={(event) => updateField('cardNumber', event.target.value)}
+                onChange={(event) => updateCardNumber(event.target.value)}
                 placeholder="0000 0000 0000 0000"
               />
               {errors.cardNumber && <small className="field-error">{errors.cardNumber}</small>}
@@ -219,7 +234,9 @@ function CheckoutPage({ product, onBack, onSuccess }) {
                 type="text"
                 inputMode="numeric"
                 value={formData.ccv}
-                onChange={(event) => updateField('ccv', event.target.value)}
+                pattern="[0-9]*"
+                maxLength={3}
+                onChange={(event) => updateCcv(event.target.value)}
                 placeholder="123"
               />
               {errors.ccv && <small className="field-error">{errors.ccv}</small>}
