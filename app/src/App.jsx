@@ -21,6 +21,7 @@ const products = [
 ]
 
 const MOCK_DELIVERY_DATE = 'Entrega em até 7 dias úteis'
+const ORDERS_STORAGE_KEY = 'des-mobile-orders'
 
 function onlyDigits(value) {
   return value.replace(/\D/g, '')
@@ -36,6 +37,32 @@ function formatBrlPrice(value) {
     style: 'currency',
     currency: 'BRL',
   }).format(value)
+}
+
+function formatDateTime(value) {
+  return new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+  }).format(new Date(value))
+}
+
+function loadOrders() {
+  if (typeof window === 'undefined') {
+    return []
+  }
+
+  try {
+    const rawOrders = window.localStorage.getItem(ORDERS_STORAGE_KEY)
+    const parsedOrders = rawOrders ? JSON.parse(rawOrders) : []
+
+    return Array.isArray(parsedOrders) ? parsedOrders : []
+  } catch {
+    return []
+  }
+}
+
+function saveOrders(orders) {
+  window.localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders))
 }
 
 function isValidCpf(value) {
@@ -77,8 +104,17 @@ function ProductCard({ product, onViewDetails }) {
   return (
     <article className="product-card">
       <div className="product-image-wrap">
-        <img className="product-image" src={product.image} alt={product.name} />
+        <img
+          className="product-image"
+          src={product.image}
+          alt={product.name}
+          onError={(e) => {
+            e.currentTarget.onerror = null
+            e.currentTarget.src = '/favicon.svg'
+          }}
+        />
       </div>
+      <small className="image-path">{product.image}</small>
 
       <h2>{product.name}</h2>
       <p className="product-description">{product.description}</p>
@@ -112,7 +148,15 @@ function ProductDetails({ product, onBack, onCheckout }) {
 
       <section className="details-content">
         <div className="details-image-wrap">
-          <img className="details-image" src={product.image} alt={product.name} />
+          <img
+            className="details-image"
+            src={product.image}
+            alt={product.name}
+            onError={(e) => {
+              e.currentTarget.onerror = null
+              e.currentTarget.src = '/favicon.svg'
+            }}
+          />
         </div>
 
         <div className="details-copy">
@@ -148,7 +192,15 @@ function CheckoutOrderCard({ product, finalPrice }) {
   return (
     <section className="checkout-order-card" aria-label="Resumo do pedido">
       <div className="checkout-order-image-wrap">
-        <img className="checkout-order-image" src={product.image} alt={product.name} />
+        <img
+          className="checkout-order-image"
+          src={product.image}
+          alt={product.name}
+          onError={(e) => {
+            e.currentTarget.onerror = null
+            e.currentTarget.src = '/favicon.svg'
+          }}
+        />
       </div>
 
       <div className="checkout-order-copy">
@@ -172,6 +224,66 @@ function CheckoutOrderCard({ product, finalPrice }) {
         </div>
       </div>
     </section>
+  )
+}
+
+function OrderCard({ order }) {
+  return (
+    <article className="order-card">
+      <div className="order-card-image-wrap">
+        <img
+          className="order-card-image"
+          src={order.image}
+          alt={order.productName}
+          onError={(e) => {
+            e.currentTarget.onerror = null
+            e.currentTarget.src = '/favicon.svg'
+          }}
+        />
+      </div>
+
+      <div className="order-card-copy">
+        <div className="order-card-header">
+          <h2>{order.productName}</h2>
+          <span className="order-card-status">{order.status}</span>
+        </div>
+
+        <p className="order-card-meta">Pedido feito em {formatDateTime(order.purchasedAt)}</p>
+        <p className="order-card-meta">Entrega prevista: {order.deliveryDate}</p>
+
+        <div className="order-card-prices">
+          <span>Total pago</span>
+          <strong>{formatBrlPrice(order.finalPrice)}</strong>
+        </div>
+      </div>
+    </article>
+  )
+}
+
+function OrdersPage({ orders, onBack }) {
+  return (
+    <main className="orders-page">
+      <header className="page-header">
+        <button className="back-button" onClick={onBack} type="button" aria-label="Voltar">
+          ← Voltar
+        </button>
+        <h1>Meus pedidos</h1>
+        <p className="section-note">Acompanhe aqui os pedidos já realizados.</p>
+      </header>
+
+      {orders.length === 0 ? (
+        <section className="empty-orders-state">
+          <h2>Nenhum pedido ainda</h2>
+          <p>Quando você finalizar uma compra, ela vai aparecer aqui.</p>
+        </section>
+      ) : (
+        <section className="orders-list" aria-label="Lista de pedidos">
+          {orders.map((order) => (
+            <OrderCard key={order.id} order={order} />
+          ))}
+        </section>
+      )}
+    </main>
   )
 }
 
@@ -232,8 +344,19 @@ function CheckoutPage({ product, onBack, onSuccess }) {
       return
     }
 
-    onSuccess()
     window.alert('Compra realizada com sucesso!')
+
+    onSuccess({
+      id: `order-${Date.now()}`,
+      productId: product.id,
+      productName: product.name,
+      image: product.image,
+      status: 'Pedido confirmado',
+      purchasedAt: new Date().toISOString(),
+      deliveryDate: MOCK_DELIVERY_DATE,
+      originalPrice: product.price,
+      finalPrice,
+    })
   }
 
   return (
@@ -320,6 +443,7 @@ function CheckoutPage({ product, onBack, onSuccess }) {
 function App() {
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [screen, setScreen] = useState('catalog')
+  const [orders, setOrders] = useState(loadOrders)
 
   const handleViewDetails = (product) => {
     setSelectedProduct(product)
@@ -334,6 +458,21 @@ function App() {
   const handleBackToCatalog = () => {
     setScreen('catalog')
     setSelectedProduct(null)
+  }
+
+  const handleOpenOrders = () => {
+    setScreen('orders')
+    setSelectedProduct(null)
+  }
+
+  const handlePurchaseSuccess = (order) => {
+    setOrders((currentOrders) => {
+      const nextOrders = [order, ...currentOrders]
+      saveOrders(nextOrders)
+      return nextOrders
+    })
+    setSelectedProduct(null)
+    setScreen('orders')
   }
 
   if (screen === 'details') {
@@ -351,16 +490,30 @@ function App() {
       <CheckoutPage
         product={selectedProduct}
         onBack={() => setScreen('details')}
-        onSuccess={handleBackToCatalog}
+        onSuccess={handlePurchaseSuccess}
       />
     )
   }
 
+  if (screen === 'orders') {
+    return <OrdersPage orders={orders} onBack={handleBackToCatalog} />
+  }
+
   return (
     <main className="catalog-page">
-      <header className="page-header">
-        <h1>Dev shop</h1>
-        <p className="section-note">Catálogo de produtos</p>
+      <header className="page-header page-header-actions">
+        <div>
+          <h1>Sports Hub</h1>
+          <p className="section-note">Catálogo de produtos</p>
+        </div>
+
+        <div className="catalog-header-actions">
+          <button type="button" className="secondary-button" onClick={handleOpenOrders}>
+            Meus pedidos
+          </button>
+        </div>
+
+        <img className="catalog-logo" src="/favicon.svg" alt="Logo da marca" />
       </header>
 
       <section className="products-grid" aria-label="Produtos disponíveis">
