@@ -203,6 +203,10 @@
   align-items: start;
 }
 
+.details-copy {
+  min-width: 0;
+}
+
 .details-image-wrap {
   border-radius: 12px;
   overflow: hidden;
@@ -227,6 +231,10 @@
   gap: 12px;
 }
 
+.details-info-grid {
+  align-items: start;
+}
+
 .details-info-card {
   padding: 14px;
   border: 1px solid #e5e7eb;
@@ -234,6 +242,12 @@
   background: #f9fafb;
   display: grid;
   gap: 6px;
+}
+
+.details-info-card {
+  box-sizing: border-box;
+  min-width: 0;
+  word-break: break-word;
 }
 
 .details-info-card span {
