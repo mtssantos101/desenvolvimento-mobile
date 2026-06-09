@@ -1,16 +1,68 @@
-# React + Vite
+# Sports Hub — Frontend (Vite + React)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicação frontend simples em React (Vite) que exibe um catálogo de produtos, tela de detalhes, fluxo de checkout com validação e persistência de pedidos em `localStorage`.
 
-Currently, two official plugins are available:
+## Principais funcionalidades
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Lista de produtos em grade (aplicação principal em `src/App.jsx`).
+- Tela de detalhes do produto.
+- Checkout com validações básicas (nome, CPF, número do cartão, CCV) e cupom de 10% aplicado.
+- Persistência de pedidos em `localStorage` e página "Meus pedidos".
+- Ativos estáticos (imagens, `favicon.svg`) em `public/`.
 
-## React Compiler
+## Pré-requisitos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js (versão 16+ recomendada)
+- npm
 
-## Expanding the ESLint configuration
+## Como rodar (desenvolvimento)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Abra um terminal e navegue até a pasta do frontend:
+
+```bash
+cd app
+```
+
+2. Instale dependências:
+
+```bash
+npm install
+```
+
+3. Inicie o servidor de desenvolvimento (Vite):
+
+```bash
+npm run dev
+```
+
+4. Abra o endereço mostrado no terminal (por padrão http://localhost:5173).
+
+## Comandos úteis
+
+- `npm run dev` — inicia o servidor de desenvolvimento.
+- `npm run build` — gera a build para produção.
+- `npm run preview` — executa um servidor local para visualizar a build.
+
+## Estrutura relevante
+
+- `src/` — código-fonte React (`src/App.jsx` contém a maior parte do app).
+- `public/` — ativos estáticos (imagens dos produtos, `favicon.svg`).
+- `index.html` — ponto de entrada HTML para Vite.
+
+## Observações / Troubleshooting
+
+- As imagens de produtos devem estar em `public/` e os paths usados no código começam com `/` (ex.: `/camisa-brasil-azul-preta.webp`). Se a imagem não aparecer:
+	- Verifique que o arquivo existe em `app/public/` com o mesmo nome.
+	- Confirme que o servidor de desenvolvimento está rodando (`npm run dev`).
+	- No navegador, abra o DevTools → Network para ver se o arquivo retorna 404.
+
+- Os pedidos são salvos no `localStorage` do navegador sob a chave `des-mobile-orders`. Para limpar dados de teste, apague essa chave nas Ferramentas de Desenvolvedor.
+
+- Se preferir usar outra porta, passe `--port` para Vite ao iniciar (`npm run dev -- --port 3000`).
+
+## Contato
+
+Se quiser que eu adicione instruções adicionais (scripts de lint, testes, CI/CD, ou deploy), diga o que deseja incluir.
+
+---
+Arquivo criado/atualizado automaticamente pelo assistente.
