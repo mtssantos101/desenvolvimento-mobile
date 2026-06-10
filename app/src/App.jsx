@@ -7,7 +7,7 @@ const products = [
     name: 'Camisa Brasil Azul e Preta',
     price: 'R$ 189,90',
     description:
-      'Modelo leve, confortável e com visual moderno para compor o catálogo da loja.',
+      'Modelo leve, confortável e com visual moderno.',
     image: '/camisa-brasil-azul-preta.webp',
   },
   {
@@ -15,7 +15,7 @@ const products = [
     name: 'Camisa Brasil Amarela',
     price: 'R$ 189,90',
     description:
-      'Modelo leve, confortável e com visual moderno para compor o catálogo da loja.',
+      'Modelo leve, confortável e com visual moderno.',
     image: '/camisa-brazil-amarela.webp',
   },
 ]
