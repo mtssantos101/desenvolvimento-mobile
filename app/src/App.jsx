@@ -1,5 +1,5 @@
 import './App.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const products = [
   {
@@ -344,10 +344,10 @@ function CheckoutPage({ product, onBack, onSuccess }) {
       return
     }
 
-    window.alert('Compra realizada com sucesso!')
+
 
     onSuccess({
-      id: `order-${Date.now()}`,
+      id: `PED-${Math.floor(100000 + Math.random() * 900000)}`,
       productId: product.id,
       productName: product.name,
       image: product.image,
@@ -440,10 +440,90 @@ function CheckoutPage({ product, onBack, onSuccess }) {
   )
 }
 
+function OrderConfirmationPage({ order, onViewOrders }) {
+  const [countdown, setCountdown] = useState(10)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdown((current) => current - 1)
+    }, 1000)
+
+    const redirectTimer = setTimeout(() => {
+      onViewOrders()
+    }, 10000)
+
+    return () => {
+      clearInterval(interval)
+      clearTimeout(redirectTimer)
+    }
+  }, [onViewOrders])
+
+  return (
+    <main className="confirmation-page">
+      <header className="page-header">
+        <h1>Pedido confirmado</h1>
+
+        <p className="section-note">
+          Sua compra foi realizada com sucesso.
+        </p>
+      </header>
+
+      <div className="confirmation-summary">
+        <h2>{order.productName}</h2>
+
+        <p className="section-note">
+          O pedido foi registrado e já está disponível na área de pedidos.
+        </p>
+      </div>
+
+      <div className="details-info-grid">
+        <div className="details-info-card">
+          <span>Pedido</span>
+          <strong>{order.id}</strong>
+        </div>
+
+        <div className="details-info-card">
+          <span>Total pago</span>
+          <strong>{formatBrlPrice(order.finalPrice)}</strong>
+        </div>
+
+        <div className="details-info-card">
+          <span>Status</span>
+          <strong>{order.status}</strong>
+        </div>
+
+        <div className="details-info-card">
+          <span>Entrega</span>
+          <strong>{order.deliveryDate}</strong>
+        </div>
+      </div>
+
+      <div className="confirmation-progress">
+        <div className="confirmation-progress-bar"></div>
+      </div>
+
+      <p className="order-card-meta">
+        Redirecionando para Meus Pedidos em {countdown}s...
+      </p>
+
+      <div className="details-actions">
+        <button
+          type="button"
+          className="product-button"
+          onClick={onViewOrders}
+        >
+          Ver meus pedidos agora
+        </button>
+      </div>
+    </main>
+  )
+}
+
 function App() {
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [screen, setScreen] = useState('catalog')
   const [orders, setOrders] = useState(loadOrders)
+  const [lastOrder, setLastOrder] = useState(null)
 
   const handleViewDetails = (product) => {
     setSelectedProduct(product)
@@ -465,15 +545,17 @@ function App() {
     setSelectedProduct(null)
   }
 
-  const handlePurchaseSuccess = (order) => {
-    setOrders((currentOrders) => {
-      const nextOrders = [order, ...currentOrders]
-      saveOrders(nextOrders)
-      return nextOrders
-    })
-    setSelectedProduct(null)
-    setScreen('orders')
-  }
+const handlePurchaseSuccess = (order) => {
+  setOrders((currentOrders) => {
+    const nextOrders = [order, ...currentOrders]
+    saveOrders(nextOrders)
+    return nextOrders
+  })
+
+  setLastOrder(order)
+  setSelectedProduct(null)
+  setScreen('confirmation')
+}
 
   if (screen === 'details') {
     return (
@@ -494,6 +576,15 @@ function App() {
       />
     )
   }
+
+  if (screen === 'confirmation') {
+  return (
+    <OrderConfirmationPage
+      order={lastOrder}
+      onViewOrders={() => setScreen('orders')}
+    />
+  )
+}
 
   if (screen === 'orders') {
     return <OrdersPage orders={orders} onBack={handleBackToCatalog} />
