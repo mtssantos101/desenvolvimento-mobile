@@ -561,3 +561,46 @@
     height: 56px;
   }
 }
+
+.confirmation-page {
+  min-height: 100vh;
+  padding: 24px;
+  background: #ffffff;
+}
+
+.confirmation-summary {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f9fafb;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.confirmation-summary h2 {
+  margin-top: 0;
+  color: #111827;
+}
+
+.confirmation-progress {
+  margin: 20px 0;
+  height: 6px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.confirmation-progress-bar {
+  height: 100%;
+  background: #0f2747;
+  animation: countdown 5s linear forwards;
+}
+
+@keyframes countdown {
+  from {
+    width: 100%;
+  }
+
+  to {
+    width: 0%;
+  }
+}
