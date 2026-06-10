@@ -592,7 +592,7 @@
 .confirmation-progress-bar {
   height: 100%;
   background: #0f2747;
-  animation: countdown 5s linear forwards;
+  animation: countdown 10s linear forwards;
 }
 
 @keyframes countdown {
