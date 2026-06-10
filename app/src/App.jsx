@@ -114,7 +114,6 @@ function ProductCard({ product, onViewDetails }) {
           }}
         />
       </div>
-      <small className="image-path">{product.image}</small>
 
       <h2>{product.name}</h2>
       <p className="product-description">{product.description}</p>
